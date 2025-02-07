@@ -12,7 +12,7 @@ function MoodChart() {
         <h2>Statistics</h2>
         <ul>
             {Object.entries(moodCounts).map(([mood, count]) => (
-                <li>
+                <li key={mood}>
                     {mood}: {count} times
                 </li>
             ))}
