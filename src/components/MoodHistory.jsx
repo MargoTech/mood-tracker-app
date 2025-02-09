@@ -5,7 +5,7 @@ function MoodHistory() {
 
   return (
     <div>
-      <h2>History og the mood</h2>
+      <h2>History of the mood</h2>
       <ul>
         {moods.map((entry, index) => (
           <li key={index}>

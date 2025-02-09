@@ -5,19 +5,19 @@ function MoodChart() {
   const moodCounts = moods.reduce((acc, { mood }) => {
     acc[mood] = (acc[mood] || 0) + 1;
     return acc;
-  } {});
-  
+  }, {});
+
   return (
     <div>
-        <h2>Statistics</h2>
-        <ul>
-            {Object.entries(moodCounts).map(([mood, count]) => (
-                <li key={mood}>
-                    {mood}: {count} times
-                </li>
-            ))}
-        </ul>
+      <h2>Statistics</h2>
+      <ul>
+        {Object.entries(moodCounts).map(([mood, count]) => (
+          <li key={mood}>
+            {mood}: {count} times
+          </li>
+        ))}
+      </ul>
     </div>
-);
+  );
 }
-export default MoodChart
+export default MoodChart;
