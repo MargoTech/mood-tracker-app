@@ -13,12 +13,27 @@ export function MoodProvider({ children }) {
   }, [moods]);
 
   const addMood = (mood) => {
-    const newEntry = { mood, date: new Date().toLocaleDateString() };
+    const newEntry = { 
+      const newEntry = {
+        id: crypto.randomUUID(),
+        mood,
+        date: new Date().toLocaleDateString()
+      };
     setMoods([...moods, newEntry]);
   };
 
+  const deleteMood = (id) => {
+  setMoods((prev) => prev.filter((m) => m.id !== id));
+};
+
+const updateMood = (updateMood) => {
+  setMoods((prev) =>
+    prev.map((mood) => (mood.id === updateMood.id ? updateMood : mood))
+  );
+};
+
   return (
-    <MoodContext.Provider value={{ moods, addMood }}>
+    <MoodContext.Provider value={{ moods, addMood, deleteMood, updateMood }}>
       {children}
     </MoodContext.Provider>
   );
