@@ -17,8 +17,8 @@ function MoodHistory() {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold md-4">Mood History</h2>
+    <div className="bg-white shadow-xl rounded-xl p-6 mt-6">
+      <h2 className="text-xl font-bold md-4 text-gray-700">Mood History</h2>
       <ul className="space-y-2">
         {moods.length === 0 && (
           <li className="text-gray-500 italic">No moods yet</li>
