@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useMood } from "../context/MoodContext";
 
 const moodList = [
-  { emoji: "😊", label: "Great" },
-  { emoji: "😌", label: "Good" },
-  { emoji: "😐", label: "Okay" },
-  { emoji: "😓", label: "Not Great" },
-  { emoji: "😡", label: "Bad" },
+  { emoji: "😊", label: "Great", color: "bg-pink-200" },
+  { emoji: "😌", label: "Good", color: "bg-purple-200" },
+  { emoji: "😐", label: "Okay", color: "bg-yellow-200" },
+  { emoji: "😓", label: "Not Great", color: "bg-blue-200" },
+  { emoji: "😡", label: "Bad", color: "bg-red-200" },
 ];
 
 export default function MoodSelector() {
