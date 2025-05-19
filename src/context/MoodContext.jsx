@@ -1,12 +1,29 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useContext, useReducer, useEffect } from "react";
 
 const MoodContext = createContext();
 
+const initialMoods = () => {
+  const saved = localStorage.getItem("moods");
+  return saved ? JSON.parse(saved) : [];
+};
+
+function moodReducer(state, action) {
+  switch (action.type) {
+    case "ADD":
+      return [...state, action.payload];
+    case "DELETE":
+      return state.filter((m) => m.id !== action.payload);
+    case "UPDATE":
+      return state.map((m) =>
+        m.id === action.payload.id ? action.payload : m
+      );
+    default:
+      return state;
+  }
+}
+
 export function MoodProvider({ children }) {
-  const [moods, setMoods] = useState(() => {
-    const savedMoods = localStorage.getItem("moods");
-    return savedMoods ? JSON.parse(savedMoods) : [];
-  });
+  const [moods, dispatch] = useReducer(moodReducer, [], initialMoods);
 
   useEffect(() => {
     localStorage.setItem("moods", JSON.stringify(moods));
@@ -18,17 +35,15 @@ export function MoodProvider({ children }) {
       mood,
       date: new Date().toLocaleDateString(),
     };
-    setMoods([...moods, newEntry]);
+    dispatch({ type: "ADD", payload: newEntry });
   };
 
   const deleteMood = (id) => {
-    setMoods((prev) => prev.filter((m) => m.id !== id));
+    dispatch({ type: "DELETE", payload: id });
   };
 
   const updateMood = (updateMood) => {
-    setMoods((prev) =>
-      prev.map((mood) => (mood.id === updateMood.id ? updateMood : mood))
-    );
+    dispatch({ type: "UPDATE", payload: updateMood });
   };
 
   return (
