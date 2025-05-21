@@ -25,21 +25,28 @@ export default function MoodSelector() {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-2">
-      <h2 className="text-xl font-semibold">How are you feeling?</h2>
-      <div className="flex flex-wrap justify-center gap-2">
+    <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-3xl shadow-xl border border-rose-100">
+      <h2 className="text-2xl font-bold text-center text-rose-600 mb-6">
+        {" "}
+        💖How are you feeling?
+      </h2>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {moodList.map((m) => (
           <button
             key={m.label}
             onClick={() => handleMoodClick(m.label)}
             disabled={loadingLabel === m.label}
-            className={`px-4 py-2 rounded-xl shadow-md ${
-              loadingLabel === m.label
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-100"
-            }`}
+            aria-label={`Select mood: ${m.label}`}
+            className={`flex flex-col items-center justify-center rounded-2xl p-4 shadow-md transition-transform duration-300 hover:scale-105 hover:ring-2 hover:ring-rose-300 ${
+              m.color
+            } ${loadingLabel === m.label ? "ring-4 ring-rose-400" : ""}`}
           >
-            {m.emoji} {loadingLabel === m.label ? "Saving..." : m.label}
+            <span className="text-4xl">
+              {loadingLabel === m.label ? "⏳" : m.emoji}
+            </span>
+            <span className="mt-2 text-sm font-medium text-gray-700">
+              {loadingLabel === m.label ? "Saving..." : m.label}
+            </span>
           </button>
         ))}
       </div>
