@@ -82,7 +82,7 @@ function MoodHistory() {
                     onClick={() => handleUpdate(entry)}
                     className="text-blue-500 hover:underline"
                   >
-                    Edit
+                    <Pencil className="w-5 h-5" />
                   </button>
                 </div>
                 <button

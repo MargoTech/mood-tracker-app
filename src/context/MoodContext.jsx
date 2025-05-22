@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
+import { produce } from "immer";
 
 const MoodContext = createContext();
 
@@ -8,18 +9,24 @@ const initialMoods = () => {
 };
 
 function moodReducer(state, action) {
-  switch (action.type) {
-    case "ADD":
-      return [...state, action.payload];
-    case "DELETE":
-      return state.filter((m) => m.id !== action.payload);
-    case "UPDATE":
-      return state.map((m) =>
-        m.id === action.payload.id ? action.payload : m
-      );
-    default:
-      return state;
-  }
+  return produce(state, (draft) => {
+    switch (action.type) {
+      case "ADD":
+        draft.push(action.payload);
+        break;
+      case "DELETE":
+        return draft.filter((m) => m.id !== action.payload);
+      case "UPDATE": {
+        const index = draft.findIndex((m) => m.id !== action.payload);
+        if (index !== -1) {
+          draft[index] = action.payload;
+        }
+        break;
+      }
+      default:
+        return;
+    }
+  });
 }
 
 export function MoodProvider({ children }) {
