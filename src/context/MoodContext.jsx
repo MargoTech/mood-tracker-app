@@ -8,17 +8,12 @@ import {
 import { produce } from "immer";
 import {
   getAllMoods,
-  addModeToDB,
+  addMoodToDB,
   deleteMoodFromDB,
   updateMoodInDB,
 } from "../db/moodStore";
 
 const MoodContext = createContext();
-
-// const initialMoods = () => {
-//   const saved = localStorage.getItem("moods");
-//   return saved ? JSON.parse(saved) : [];
-// };
 
 function moodReducer(state, action) {
   return produce(state, (draft) => {
@@ -29,16 +24,18 @@ function moodReducer(state, action) {
         draft.push(action.payload);
         break;
       case "DELETE":
-        return draft.filter((m) => m.id === action.payload);
-      case "UPDATE": {
         const index = draft.findIndex((m) => m.id === action.payload);
+        if (index !== -1) draft.splice(index, 1);
+        break;
+      case "UPDATE": {
+        const index = draft.findIndex((m) => m.id === action.payload.id);
         if (index !== -1) {
           draft[index] = action.payload;
         }
         break;
       }
       default:
-        return;
+        break;
     }
   });
 }
@@ -48,24 +45,37 @@ export function MoodProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem("moods", JSON.stringify(moods));
-  }, [moods]);
+    async function loadMoods() {
+      try {
+        const all = await getAllMoods();
+        dispatch({ type: "SET", payload: all });
+      } catch (err) {
+        console.error("Failed to load moods from IndexedDB:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadMoods();
+  }, []);
 
-  const addMood = (mood) => {
+  const addMood = async (mood) => {
     const newEntry = {
       id: crypto.randomUUID(),
       mood,
       date: new Date().toLocaleDateString(),
     };
+    await addMoodToDB(newEntry);
     dispatch({ type: "ADD", payload: newEntry });
   };
 
-  const deleteMood = (id) => {
+  const deleteMood = async (id) => {
+    await deleteMoodFromDB(id);
     dispatch({ type: "DELETE", payload: id });
   };
 
-  const updateMood = (updateMood) => {
-    dispatch({ type: "UPDATE", payload: updateMood });
+  const updateMood = async (updated) => {
+    await updateMoodInDB(updated);
+    dispatch({ type: "UPDATE", payload: updated });
   };
 
   return (
