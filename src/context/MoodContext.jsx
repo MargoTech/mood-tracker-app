@@ -43,12 +43,28 @@ function moodReducer(state, action) {
 export function MoodProvider({ children }) {
   const [moods, dispatch] = useReducer(moodReducer, []);
   const [loading, setLoading] = useState(true);
+  const [shouldRemind, setShouldRemind] = useState(false);
 
   useEffect(() => {
     async function loadMoods() {
       try {
         const all = await getAllMoods();
         dispatch({ type: "SET", payload: all });
+
+        if (all.length > 0) {
+          const sorted = [...all].sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+          );
+          const lastDate = new Date(sorted[0].date);
+          const now = new Date();
+          const diffInDays = (now - lastDate) / (1000 * 60 * 60 * 24);
+
+          if (diffInDays > 2) {
+            setShouldRemind(true);
+          }
+        } else {
+          setShouldRemind(true);
+        }
       } catch (err) {
         console.error("Failed to load moods from IndexedDB:", err);
       } finally {
@@ -62,10 +78,11 @@ export function MoodProvider({ children }) {
     const newEntry = {
       id: crypto.randomUUID(),
       mood,
-      date: new Date().toLocaleDateString(),
+      date: new Date().toISOString().split("T")[0],
     };
     await addMoodToDB(newEntry);
     dispatch({ type: "ADD", payload: newEntry });
+    setShouldRemind(false);
   };
 
   const deleteMood = async (id) => {
