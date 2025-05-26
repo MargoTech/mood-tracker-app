@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMood } from "../context/MoodContext";
+import ReminderBanner from "./ReminderBanner";
 
 const moodList = [
   { emoji: "😊", label: "Great", color: "bg-pink-200" },
@@ -26,6 +27,7 @@ export default function MoodSelector() {
 
   return (
     <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-3xl shadow-xl border border-rose-100">
+      <ReminderBanner />
       <h2 className="text-2xl font-bold text-center text-rose-600 mb-6">
         {" "}
         💖How are you feeling?

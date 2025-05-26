@@ -37,6 +37,9 @@ function MoodHistory() {
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-3xl shadow-xl border border-rose-100">
       <h2 className="text-xl font-bold md-4 text-gray-700"> 📝 Mood History</h2>
+      <p className="text-sm text-gray-500 mb-2">
+        Total entries: {moods.length}
+      </p>
       <ul className="space-y-2">
         {moods.length === 0 && (
           <li className="text-gray-500 italic">No moods yet</li>
