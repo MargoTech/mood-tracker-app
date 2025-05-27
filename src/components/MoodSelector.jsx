@@ -11,7 +11,7 @@ const moodList = [
 ];
 
 export default function MoodSelector() {
-  const { addMood } = useMood();
+  const { moods, addMood } = useMood();
   const [loadingLabel, setLoadingLabel] = useState(null);
 
   const handleMoodClick = async (label) => {
@@ -25,6 +25,8 @@ export default function MoodSelector() {
     }
   };
 
+  const lastMood = moods[moods.length - 1];
+
   return (
     <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-3xl shadow-xl border border-rose-100">
       <ReminderBanner />
@@ -32,6 +34,13 @@ export default function MoodSelector() {
         {" "}
         💖How are you feeling?
       </h2>
+
+      {lastMood && (
+        <p>
+          Last mood: <strong>{lastMood.mood}</strong> on {lastMood.date}
+        </p>
+      )}
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {moodList.map((m) => (
           <button
