@@ -44,6 +44,7 @@ export function MoodProvider({ children }) {
   const [moods, dispatch] = useReducer(moodReducer, []);
   const [loading, setLoading] = useState(true);
   const [shouldRemind, setShouldRemind] = useState(false);
+  const [syncQueue, setSyncQueue] = useState([]);
 
   useEffect(() => {
     async function loadMoods() {
@@ -74,13 +75,37 @@ export function MoodProvider({ children }) {
     loadMoods();
   }, []);
 
+  useEffect(() => {
+    if (!syncQueue.length) return;
+
+    const interval = setInterval(async () => {
+      for (let mood of syncQueue) {
+        try {
+          await fakeApiSync(mood);
+          mood.synced = true;
+
+          await updateMoodInDB(mood);
+          dispatch({ type: "UPDATE", payload: mood });
+
+          setSyncQueue((q) => q.filter((m) => m.id !== mood.id));
+        } catch (err) {
+          console.warn("Sync failed, will retry...", mood.id);
+        }
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [syncQueue]);
+
   const addMood = async (mood) => {
     const newEntry = {
       id: crypto.randomUUID(),
       mood,
       date: new Date().toISOString().split("T")[0],
+      synced: false,
     };
     await addMoodToDB(newEntry);
+    setSyncQueue((prev) => [...prev, newEntry]);
     dispatch({ type: "ADD", payload: newEntry });
     setShouldRemind(false);
   };
