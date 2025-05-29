@@ -82,10 +82,10 @@ export function MoodProvider({ children }) {
       for (let mood of syncQueue) {
         try {
           await fakeApiSync(mood);
-          mood.synced = true;
 
-          await updateMoodInDB(mood);
-          dispatch({ type: "UPDATE", payload: mood });
+          const updated = { ...mood, synced: true };
+          await updateMoodInDB(updated);
+          dispatch({ type: "UPDATE", payload: updated });
 
           setSyncQueue((q) => q.filter((m) => m.id !== mood.id));
         } catch (err) {
@@ -93,6 +93,15 @@ export function MoodProvider({ children }) {
         }
       }
     }, 5000);
+
+    const fakeApiSync = (mood) => {
+      return new Promise((res, rej) => {
+        setTimeout(() => {
+          if (Math.random() < 0.9) res();
+          else rej("Random API fail");
+        }, 1000);
+      });
+    };
 
     return () => clearInterval(interval);
   }, [syncQueue]);
@@ -120,8 +129,23 @@ export function MoodProvider({ children }) {
     dispatch({ type: "UPDATE", payload: updated });
   };
 
+  const syncAll = async () => {
+    for (let mood of moods.filter((m) => !m.synced)) {
+      try {
+        const updated = { ...mood, synced: true };
+        await fakeApiSync(updated);
+        await updateMoodInDB(updated);
+        dispatch({ type: "UPDATE", payload: updated });
+      } catch (err) {
+        console.warm("Manual sync failed for:", mood.id);
+      }
+    }
+  };
+
   return (
-    <MoodContext.Provider value={{ moods, addMood, deleteMood, updateMood }}>
+    <MoodContext.Provider
+      value={{ moods, addMood, deleteMood, updateMood, shouldRemind, syncAll }}
+    >
       {children}
     </MoodContext.Provider>
   );
