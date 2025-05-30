@@ -12,6 +12,7 @@ import {
   deleteMoodFromDB,
   updateMoodInDB,
 } from "../db/moodStore";
+import { useMemo } from "react";
 
 const MoodContext = createContext();
 
@@ -45,6 +46,7 @@ export function MoodProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [shouldRemind, setShouldRemind] = useState(false);
   const [syncQueue, setSyncQueue] = useState([]);
+  const [filter, setFilter] = useState({ mood: "All", days: 0 });
 
   useEffect(() => {
     async function loadMoods() {
@@ -142,9 +144,23 @@ export function MoodProvider({ children }) {
     }
   };
 
+  const filteredMoods = useMemo(() => {
+    return moods.filter((m) => {
+      const matchesMood =
+        filter.mood === "All" ||
+        m.mood.toLowerCase() === filter.mood.toLowerCase();
+
+      const matchesDate =
+        filter.days === 0 ||
+        (new Date() - new Date(m.date)) / (1000 * 60 * 60 * 24) <= filter.days;
+
+      return matchesMood && matchesDate;
+    });
+  }, [moods, filter]);
+
   return (
     <MoodContext.Provider
-      value={{ moods, addMood, deleteMood, updateMood, shouldRemind, syncAll }}
+      value={{ moods, filteredMoods addMood, deleteMood, updateMood, shouldRemind, syncAll, filter, setFilter }}
     >
       {children}
     </MoodContext.Provider>
