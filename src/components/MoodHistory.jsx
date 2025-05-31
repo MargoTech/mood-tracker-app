@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Pencil, Trash2, Save, X } from "lucide-react";
 
 function MoodHistory() {
-  const { moods, deleteMood, updateMood } = useMood();
+  const { moods, filteredMoods, deleteMood, updateMood } = useMood();
   const [loadingId, setLoadingId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [editedMood, setEditedMood] = useState("");
@@ -24,14 +24,20 @@ function MoodHistory() {
     setEditedMood(entry.mood);
   };
 
-  const handleSave = () => {
-    updateMood({
-      id: editId,
-      mood: editedMood,
-      date: new Date().toLocaleDateString(),
-    });
-    setEditId(null);
-    setEditedMood("");
+  const handleSave = async () => {
+    try {
+      await updateMood({
+        id: editId,
+        mood: editedMood,
+        date: new Date().toISOString().split("T")[0],
+        synced: false,
+      });
+    } catch (err) {
+      console.error("Failed to update mood:", err);
+    } finally {
+      setEditId(null);
+      setEditedMood("");
+    }
   };
 
   return (
@@ -40,11 +46,15 @@ function MoodHistory() {
       <p className="text-sm text-gray-500 mb-2">
         Total entries: {moods.length}
       </p>
+
+      {filteredMoods.length === 0 && (
+        <p className="italic text-gray-500 mb-4">
+          No moods match your filters.
+        </p>
+      )}
+
       <ul className="space-y-2">
-        {moods.length === 0 && (
-          <li className="text-gray-500 italic">No moods yet</li>
-        )}
-        {moods.map((entry) => (
+        {filteredMoods.map((entry) => (
           <li
             key={entry.id}
             className="bg-rose-50 p-4 rounded-2xl flex items-center justify-between shadow hover:shadow-lg transition-shadow"

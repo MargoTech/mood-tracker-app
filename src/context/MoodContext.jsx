@@ -160,7 +160,17 @@ export function MoodProvider({ children }) {
 
   return (
     <MoodContext.Provider
-      value={{ moods, filteredMoods addMood, deleteMood, updateMood, shouldRemind, syncAll, filter, setFilter }}
+      value={{
+        moods,
+        filteredMoods,
+        addMood,
+        deleteMood,
+        updateMood,
+        shouldRemind,
+        syncAll,
+        filter,
+        setFilter,
+      }}
     >
       {children}
     </MoodContext.Provider>
