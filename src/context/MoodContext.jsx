@@ -48,6 +48,15 @@ export function MoodProvider({ children }) {
   const [syncQueue, setSyncQueue] = useState([]);
   const [filter, setFilter] = useState({ mood: "All", days: 0 });
 
+  const fakeApiSync = (mood) => {
+    return new Promise((res, rej) => {
+      setTimeout(() => {
+        if (Math.random() < 0.9) res();
+        else rej("Random API fail");
+      }, 1000);
+    });
+  };
+
   useEffect(() => {
     async function loadMoods() {
       try {
@@ -96,15 +105,6 @@ export function MoodProvider({ children }) {
       }
     }, 5000);
 
-    const fakeApiSync = (mood) => {
-      return new Promise((res, rej) => {
-        setTimeout(() => {
-          if (Math.random() < 0.9) res();
-          else rej("Random API fail");
-        }, 1000);
-      });
-    };
-
     return () => clearInterval(interval);
   }, [syncQueue]);
 
@@ -139,7 +139,7 @@ export function MoodProvider({ children }) {
         await updateMoodInDB(updated);
         dispatch({ type: "UPDATE", payload: updated });
       } catch (err) {
-        console.warm("Manual sync failed for:", mood.id);
+        console.warn("Manual sync failed for:", mood.id);
       }
     }
   };
@@ -170,6 +170,7 @@ export function MoodProvider({ children }) {
         syncAll,
         filter,
         setFilter,
+        loading,
       }}
     >
       {children}

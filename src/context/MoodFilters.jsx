@@ -21,7 +21,9 @@ export default function MoodFilters() {
       <select
         className="p-2 border rounded-xl"
         value={filter.days}
-        onChange={(e) => setFilter((f) => ({ ...f, Number(e.target.value) }))}
+        onChange={(e) =>
+          setFilter((f) => ({ ...f, days: Number(e.target.value) }))
+        }
       >
         <option value={0}>All Time</option>
         <option value={1}>Last 1 Day</option>
