@@ -7,7 +7,9 @@ const VERSION = 1;
 const dbPromise = openDB(DB_NAME, VERSION, {
   upgrade(db) {
     if (!db.objectStoreNames.contains(STORE_NAME)) {
-      db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      store.createIndex("date", "date");
+      store.createIndex("mood", "mood");
     }
   },
 });

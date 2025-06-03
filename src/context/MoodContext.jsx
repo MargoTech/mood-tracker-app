@@ -108,11 +108,12 @@ export function MoodProvider({ children }) {
     return () => clearInterval(interval);
   }, [syncQueue]);
 
-  const addMood = async (mood) => {
+  const addMood = async (mood, note = "") => {
     const newEntry = {
       id: crypto.randomUUID(),
       mood,
       date: new Date().toISOString().split("T")[0],
+      note,
       synced: false,
     };
     await addMoodToDB(newEntry);

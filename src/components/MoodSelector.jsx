@@ -13,6 +13,7 @@ const moodList = [
 export default function MoodSelector() {
   const { moods, addMood } = useMood();
   const [loadingLabel, setLoadingLabel] = useState(null);
+  const [note, setNote] = useState("");
 
   const handleMoodClick = async (label) => {
     setLoadingLabel(label);
@@ -34,6 +35,24 @@ export default function MoodSelector() {
         {" "}
         💖How are you feeling?
       </h2>
+
+      <textarea
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Optional note..."
+        className="p-2 border rounded-xl w-full mt-2"
+      />
+
+      <button
+        className="bg-indigo-600 text-white px-4 py-2 rounded-xl"
+        onClick={() => {
+          addMood(selectedMood, note);
+          setSelectedMood(null);
+          setNote("");
+        }}
+      >
+        Save Mood
+      </button>
 
       {lastMood && (
         <p>
