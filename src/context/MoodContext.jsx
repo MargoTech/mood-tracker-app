@@ -139,7 +139,8 @@ export function MoodProvider({ children }) {
         await fakeApiSync(updated);
         await updateMoodInDB(updated);
         dispatch({ type: "UPDATE", payload: updated });
-      } catch (err) {
+      } 
+      catch (err) {
         console.warn("Manual sync failed for:", mood.id);
       }
     }
@@ -159,25 +160,20 @@ export function MoodProvider({ children }) {
     });
   }, [moods, filter]);
 
-  return (
-    <MoodContext.Provider
-      value={{
-        moods,
-        filteredMoods,
-        addMood,
-        deleteMood,
-        updateMood,
-        shouldRemind,
-        syncAll,
-        filter,
-        setFilter,
-        loading,
-      }}
-    >
-      {children}
-    </MoodContext.Provider>
-  );
-}
+ const value = useMemo(() => ({
+  moods,
+  filteredMoods,
+  addMood,
+  deleteMood,
+  updateMood,
+  shouldRemind,
+  syncAll,
+  filter,
+  setFilter,
+  loading,
+}), [moods, filteredMoods, shouldRemind, filter, loading]);
+
+return <MoodContext.Provider value={value}>{children}</MoodContext.Provider>;
 
 export function useMood() {
   return useContext(MoodContext);
