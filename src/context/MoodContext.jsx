@@ -4,6 +4,7 @@ import {
   useReducer,
   useEffect,
   useState,
+  useMemo,
 } from "react";
 import { produce } from "immer";
 import {
@@ -12,9 +13,12 @@ import {
   deleteMoodFromDB,
   updateMoodInDB,
 } from "../db/moodStore";
-import { useMemo } from "react";
 
 const MoodContext = createContext();
+
+function getDaysDiff(date1, date2) {
+  return (date1 - date2) / (1000 * 60 * 60 * 24);
+}
 
 function moodReducer(state, action) {
   return produce(state, (draft) => {
@@ -48,11 +52,10 @@ export function MoodProvider({ children }) {
   const [syncQueue, setSyncQueue] = useState([]);
   const [filter, setFilter] = useState({ mood: "All", days: 0 });
 
-  const fakeApiSync = (mood) => {
+  const simulateApiSync = (mood) => {
     return new Promise((res, rej) => {
       setTimeout(() => {
-        if (Math.random() < 0.9) res();
-        else rej("Random API fail");
+        Math.random() < 0.9 ? res() : rej("Random API fail");
       }, 1000);
     });
   };
