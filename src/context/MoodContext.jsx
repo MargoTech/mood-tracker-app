@@ -95,7 +95,7 @@ export function MoodProvider({ children }) {
     const interval = setInterval(async () => {
       for (let mood of syncQueue) {
         try {
-          await fakeApiSync(mood);
+          await simulateApiSync(mood);
 
           const updated = { ...mood, synced: true };
           await updateMoodInDB(updated);
@@ -119,10 +119,14 @@ export function MoodProvider({ children }) {
       note,
       synced: false,
     };
+    
     await addMoodToDB(newEntry);
     setSyncQueue((prev) => [...prev, newEntry]);
     dispatch({ type: "ADD", payload: newEntry });
     setShouldRemind(false);
+  } catch (err) {
+      console.error("Failed to add mood:", err);
+    }
   };
 
   const deleteMood = async (id) => {
@@ -163,7 +167,8 @@ export function MoodProvider({ children }) {
     });
   }, [moods, filter]);
 
- const value = useMemo(() => ({
+ const value = useMemo(
+  () => ({
   moods,
   filteredMoods,
   addMood,
@@ -174,7 +179,9 @@ export function MoodProvider({ children }) {
   filter,
   setFilter,
   loading,
-}), [moods, filteredMoods, shouldRemind, filter, loading]);
+}), 
+[moods, filteredMoods, shouldRemind, filter, loading]
+);
 
 return <MoodContext.Provider value={value}>{children}</MoodContext.Provider>;
 
