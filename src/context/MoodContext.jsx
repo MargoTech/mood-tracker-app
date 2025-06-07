@@ -112,6 +112,7 @@ export function MoodProvider({ children }) {
   }, [syncQueue]);
 
   const addMood = async (mood, note = "") => {
+  try {
     const newEntry = {
       id: crypto.randomUUID(),
       mood,
@@ -119,15 +120,15 @@ export function MoodProvider({ children }) {
       note,
       synced: false,
     };
-    
+
     await addMoodToDB(newEntry);
     setSyncQueue((prev) => [...prev, newEntry]);
     dispatch({ type: "ADD", payload: newEntry });
     setShouldRemind(false);
   } catch (err) {
-      console.error("Failed to add mood:", err);
-    }
-  };
+    console.error("Failed to add mood:", err);
+  }
+};
 
   const deleteMood = async (id) => {
     await deleteMoodFromDB(id);
@@ -142,12 +143,12 @@ export function MoodProvider({ children }) {
   const syncAll = async () => {
     for (let mood of moods.filter((m) => !m.synced)) {
       try {
+        await simulateApiSync(mood);
+
         const updated = { ...mood, synced: true };
-        await fakeApiSync(updated);
         await updateMoodInDB(updated);
         dispatch({ type: "UPDATE", payload: updated });
-      } 
-      catch (err) {
+      } catch (err) {
         console.warn("Manual sync failed for:", mood.id);
       }
     }
