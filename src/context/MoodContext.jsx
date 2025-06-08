@@ -21,29 +21,28 @@ function getDaysDiff(date1, date2) {
 }
 
 function moodReducer(state, action) {
-  return produce(state, (draft) => {
-    switch (action.type) {
-      case "SET":
-        return action.payload;
-      case "ADD":
-        draft.push(action.payload);
-        break;
-      case "DELETE":
-        const index = draft.findIndex((m) => m.id === action.payload);
-        if (index !== -1) draft.splice(index, 1);
-        break;
-      case "UPDATE": {
-        const index = draft.findIndex((m) => m.id === action.payload.id);
-        if (index !== -1) {
-          draft[index] = action.payload;
+  switch (action.type) {
+    case "SET":
+      return action.payload;
+    default:
+      return produce(state, (draft) => {
+        switch (action.type) {
+          case "ADD":
+            draft.push(action.payload);
+            break;
+          case "DELETE":
+            const index = draft.findIndex((m) => m.id === action.payload);
+            if (index !== -1) draft.splice(index, 1);
+            break;
+          case "UPDATE":
+            const i = draft.findIndex((m) => m.id === action.payload.id);
+            if (i !== -1) draft[i] = action.payload;
+            break;
         }
-        break;
-      }
-      default:
-        break;
-    }
-  });
+      });
+  }
 }
+
 
 export function MoodProvider({ children }) {
   const [moods, dispatch] = useReducer(moodReducer, []);
@@ -89,27 +88,32 @@ export function MoodProvider({ children }) {
     loadMoods();
   }, []);
 
-  useEffect(() => {
-    if (!syncQueue.length) return;
+ useEffect(() => {
+  let cancelled = false;
 
-    const interval = setInterval(async () => {
-      for (let mood of syncQueue) {
-        try {
-          await simulateApiSync(mood);
+  async function syncNext() {
+    if (cancelled || !syncQueue.length) return;
+    
+    for (let mood of syncQueue) {
+      try {
+        await simulateApiSync(mood);
+        const updated = { ...mood, synced: true };
+        await updateMoodInDB(updated);
+        dispatch({ type: "UPDATE", payload: updated });
 
-          const updated = { ...mood, synced: true };
-          await updateMoodInDB(updated);
-          dispatch({ type: "UPDATE", payload: updated });
-
-          setSyncQueue((q) => q.filter((m) => m.id !== mood.id));
-        } catch (err) {
-          console.warn("Sync failed, will retry...", mood.id);
-        }
+        setSyncQueue((q) => q.filter((m) => m.id !== mood.id));
+      } catch {
+        console.warn("Sync failed for", mood.id);
       }
-    }, 5000);
+    }
 
-    return () => clearInterval(interval);
-  }, [syncQueue]);
+    setTimeout(syncNext, 5000);
+  }
+
+  syncNext();
+
+  return () => { cancelled = true; };
+}, [syncQueue]);
 
   const addMood = async (mood, note = "") => {
   try {
