@@ -16,10 +16,6 @@ import {
 
 const MoodContext = createContext();
 
-function getDaysDiff(date1, date2) {
-  return (date1 - date2) / (1000 * 60 * 60 * 24);
-}
-
 function moodReducer(state, action) {
   switch (action.type) {
     case "SET":
@@ -42,7 +38,6 @@ function moodReducer(state, action) {
       });
   }
 }
-
 
 export function MoodProvider({ children }) {
   const [moods, dispatch] = useReducer(moodReducer, []);
@@ -85,54 +80,58 @@ export function MoodProvider({ children }) {
         setLoading(false);
       }
     }
+
     loadMoods();
   }, []);
 
- useEffect(() => {
-  let cancelled = false;
+  useEffect(() => {
+    let cancelled = false;
 
-  async function syncNext() {
-    if (cancelled || !syncQueue.length) return;
-    
-    for (let mood of syncQueue) {
-      try {
-        await simulateApiSync(mood);
-        const updated = { ...mood, synced: true };
-        await updateMoodInDB(updated);
-        dispatch({ type: "UPDATE", payload: updated });
+    async function syncNext() {
+      if (cancelled || !syncQueue.length) return;
 
-        setSyncQueue((q) => q.filter((m) => m.id !== mood.id));
-      } catch {
-        console.warn("Sync failed for", mood.id);
+      for (let mood of syncQueue) {
+        try {
+          await simulateApiSync(mood);
+          const updated = { ...mood, synced: true };
+          await updateMoodInDB(updated);
+          dispatch({ type: "UPDATE", payload: updated });
+          setSyncQueue((q) => q.filter((m) => m.id !== mood.id));
+        } catch {
+          console.warn("Sync failed for", mood.id);
+        }
       }
+
+      setTimeout(syncNext, 5000);
     }
 
-    setTimeout(syncNext, 5000);
-  }
+    syncNext();
 
-  syncNext();
+    return () => {
+      cancelled = true;
+    };
+  }, [syncQueue]);
 
-  return () => { cancelled = true; };
-}, [syncQueue]);
+  const createMoodEntry = (mood, note = "") => ({
+    id: crypto.randomUUID(),
+    mood,
+    date: new Date().toISOString().split("T")[0],
+    note,
+    synced: false,
+  });
 
   const addMood = async (mood, note = "") => {
-  try {
-    const newEntry = {
-      id: crypto.randomUUID(),
-      mood,
-      date: new Date().toISOString().split("T")[0],
-      note,
-      synced: false,
-    };
+    try {
+      const newEntry = createMoodEntry(mood, note);
 
-    await addMoodToDB(newEntry);
-    setSyncQueue((prev) => [...prev, newEntry]);
-    dispatch({ type: "ADD", payload: newEntry });
-    setShouldRemind(false);
-  } catch (err) {
-    console.error("Failed to add mood:", err);
-  }
-};
+      await addMoodToDB(newEntry);
+      setSyncQueue((prev) => [...prev, newEntry]);
+      dispatch({ type: "ADD", payload: newEntry });
+      setShouldRemind(false);
+    } catch (err) {
+      console.error("Failed to add mood:", err);
+    }
+  };
 
   const deleteMood = async (id) => {
     await deleteMoodFromDB(id);
@@ -172,24 +171,21 @@ export function MoodProvider({ children }) {
     });
   }, [moods, filter]);
 
- const value = useMemo(
-  () => ({
-  moods,
-  filteredMoods,
-  addMood,
-  deleteMood,
-  updateMood,
-  shouldRemind,
-  syncAll,
-  filter,
-  setFilter,
-  loading,
-}), 
-[moods, filteredMoods, shouldRemind, filter, loading]
-);
+  const value = useMemo(
+    () => ({
+      moods,
+      filteredMoods,
+      addMood,
+      deleteMood,
+      updateMood,
+      shouldRemind,
+      syncAll,
+      filter,
+      setFilter,
+      loading,
+    }),
+    [moods, filteredMoods, shouldRemind, filter, loading]
+  );
 
-return <MoodContext.Provider value={value}>{children}</MoodContext.Provider>;
-
-export function useMood() {
-  return useContext(MoodContext);
+  return <MoodContext.Provider value={value}>{children}</MoodContext.Provider>;
 }
