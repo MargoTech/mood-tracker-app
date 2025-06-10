@@ -6,38 +6,16 @@ import {
   useState,
   useMemo,
 } from "react";
-import { produce } from "immer";
 import {
   getAllMoods,
   addMoodToDB,
   deleteMoodFromDB,
   updateMoodInDB,
 } from "../db/moodStore";
+import { moodReducer } from "./moodReducer";
+import { createMoodEntry, simulateApiSync } from "./moodUtils";
 
 const MoodContext = createContext();
-
-function moodReducer(state, action) {
-  switch (action.type) {
-    case "SET":
-      return action.payload;
-    default:
-      return produce(state, (draft) => {
-        switch (action.type) {
-          case "ADD":
-            draft.push(action.payload);
-            break;
-          case "DELETE":
-            const index = draft.findIndex((m) => m.id === action.payload);
-            if (index !== -1) draft.splice(index, 1);
-            break;
-          case "UPDATE":
-            const i = draft.findIndex((m) => m.id === action.payload.id);
-            if (i !== -1) draft[i] = action.payload;
-            break;
-        }
-      });
-  }
-}
 
 export function MoodProvider({ children }) {
   const [moods, dispatch] = useReducer(moodReducer, []);
@@ -45,14 +23,6 @@ export function MoodProvider({ children }) {
   const [shouldRemind, setShouldRemind] = useState(false);
   const [syncQueue, setSyncQueue] = useState([]);
   const [filter, setFilter] = useState({ mood: "All", days: 0 });
-
-  const simulateApiSync = (mood) => {
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        Math.random() < 0.9 ? res() : rej("Random API fail");
-      }, 1000);
-    });
-  };
 
   useEffect(() => {
     async function loadMoods() {
@@ -80,7 +50,6 @@ export function MoodProvider({ children }) {
         setLoading(false);
       }
     }
-
     loadMoods();
   }, []);
 
@@ -96,6 +65,7 @@ export function MoodProvider({ children }) {
           const updated = { ...mood, synced: true };
           await updateMoodInDB(updated);
           dispatch({ type: "UPDATE", payload: updated });
+
           setSyncQueue((q) => q.filter((m) => m.id !== mood.id));
         } catch {
           console.warn("Sync failed for", mood.id);
@@ -112,18 +82,9 @@ export function MoodProvider({ children }) {
     };
   }, [syncQueue]);
 
-  const createMoodEntry = (mood, note = "") => ({
-    id: crypto.randomUUID(),
-    mood,
-    date: new Date().toISOString().split("T")[0],
-    note,
-    synced: false,
-  });
-
   const addMood = async (mood, note = "") => {
     try {
       const newEntry = createMoodEntry(mood, note);
-
       await addMoodToDB(newEntry);
       setSyncQueue((prev) => [...prev, newEntry]);
       dispatch({ type: "ADD", payload: newEntry });
@@ -147,7 +108,6 @@ export function MoodProvider({ children }) {
     for (let mood of moods.filter((m) => !m.synced)) {
       try {
         await simulateApiSync(mood);
-
         const updated = { ...mood, synced: true };
         await updateMoodInDB(updated);
         dispatch({ type: "UPDATE", payload: updated });
@@ -188,4 +148,8 @@ export function MoodProvider({ children }) {
   );
 
   return <MoodContext.Provider value={value}>{children}</MoodContext.Provider>;
+}
+
+export function useMood() {
+  return useContext(MoodContext);
 }
