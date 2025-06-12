@@ -14,13 +14,21 @@ export default function MoodSelector() {
   const { moods, addMood } = useMood();
   const [loadingLabel, setLoadingLabel] = useState(null);
   const [note, setNote] = useState("");
+  const [selectedMood, setSelectedMood] = useState(null);
 
-  const handleMoodClick = async (label) => {
-    setLoadingLabel(label);
+  const handleMoodClick = (label) => {
+    setSelectedMood(label);
+  };
+  const handleSave = async () => {
+    if (!selectedMood) return;
+
+    setLoadingLabel(selectedMood);
     try {
-      await addMood(label);
-    } catch (error) {
-      console.error("Something went wrong. Try again later.", error);
+      await addMood(selectedMood, note);
+      setSelectedMood(null);
+      setNote("");
+    } catch (err) {
+      console.error("Failed to add mood", err);
     } finally {
       setLoadingLabel(null);
     }
@@ -45,11 +53,7 @@ export default function MoodSelector() {
 
       <button
         className="bg-indigo-600 text-white px-4 py-2 rounded-xl"
-        onClick={() => {
-          addMood(selectedMood, note);
-          setSelectedMood(null);
-          setNote("");
-        }}
+        onClick={handleSave}
       >
         Save Mood
       </button>

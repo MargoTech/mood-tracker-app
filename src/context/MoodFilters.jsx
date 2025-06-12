@@ -1,4 +1,4 @@
-import { useMood } from "./MoodContext";
+import { useMood } from "../context/MoodContext";
 
 export default function MoodFilters() {
   const { filter, setFilter } = useMood();
