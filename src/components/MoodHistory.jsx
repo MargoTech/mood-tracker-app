@@ -7,6 +7,7 @@ function MoodHistory() {
   const [loadingId, setLoadingId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [editedMood, setEditedMood] = useState("");
+  const [editedNote, setEditedNote] = useState("");
 
   const handleDelete = async (id) => {
     setLoadingId(id);
@@ -22,6 +23,7 @@ function MoodHistory() {
   const handleUpdate = (entry) => {
     setEditId(entry.id);
     setEditedMood(entry.mood);
+    setEditedNote(entry.note || "");
   };
 
   const handleSave = async () => {
@@ -72,6 +74,13 @@ function MoodHistory() {
                   <option>Not Great</option>
                   <option>Bad</option>
                 </select>
+                <input
+                  type="text"
+                  value={editedNote}
+                  onChange={(e) => setEditedNote(e.target.value)}
+                  placeholder="Optional note"
+                  className="border p-1 rounded-md w-full mt-2"
+                />
                 <button
                   onClick={handleSave}
                   className="text-green-600 hover:underline"
@@ -90,6 +99,9 @@ function MoodHistory() {
                 <span className="text-gray-700 font-medium">
                   <strong>{entry.date}</strong>: {entry.mood}
                 </span>
+                {entry.note && (
+                  <p className="text-sm text-gray-600 mt-1">📝 {entry.note}</p>
+                )}
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleUpdate(entry)}
