@@ -31,6 +31,7 @@ function MoodHistory() {
       await updateMood({
         id: editId,
         mood: editedMood,
+        note: editedNote,
         date: new Date().toISOString().split("T")[0],
         synced: false,
       });
@@ -39,6 +40,7 @@ function MoodHistory() {
     } finally {
       setEditId(null);
       setEditedMood("");
+      setEditedNote("");
     }
   };
 
@@ -81,18 +83,21 @@ function MoodHistory() {
                   placeholder="Optional note"
                   className="border p-1 rounded-md w-full mt-2"
                 />
-                <button
-                  onClick={handleSave}
-                  className="text-green-600 hover:underline"
-                >
-                  <Save className="inline w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setEditId(null)}
-                  className="text-gray-500 hover:underline"
-                >
-                  <X className="inline w-5 h-5" />
-                </button>
+
+                <div>
+                  <button
+                    onClick={handleSave}
+                    className="text-green-600 hover:underline"
+                  >
+                    <Save className="inline w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setEditId(null)}
+                    className="text-gray-500 hover:underline"
+                  >
+                    <X className="inline w-5 h-5" />
+                  </button>
+                </div>
               </div>
             ) : (
               <>
