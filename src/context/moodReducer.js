@@ -8,6 +8,7 @@ export function moodReducer(state, action) {
       return produce(state, (draft) => {
         switch (action.type) {
           case "ADD":
+            console.log("🟢 Reducer ADD payload:", action.payload);
             draft.push(action.payload);
             break;
           case "DELETE":

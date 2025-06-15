@@ -2,7 +2,7 @@ export function createMoodEntry(mood, note = "") {
   return {
     id: crypto.randomUUID(),
     mood,
-    date: new Date().toISOString().split("T")[0],
+    date: new Date().toISOString(),
     note,
     synced: false,
   };

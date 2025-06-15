@@ -9,6 +9,9 @@ function MoodHistory() {
   const [editedMood, setEditedMood] = useState("");
   const [editedNote, setEditedNote] = useState("");
 
+  console.log("📦 All moods:", moods);
+  console.log("📂 Filtered moods:", filteredMoods);
+
   const handleDelete = async (id) => {
     setLoadingId(id);
     try {

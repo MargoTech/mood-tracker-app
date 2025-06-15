@@ -85,6 +85,7 @@ export function MoodProvider({ children }) {
   const addMood = async (mood, note = "") => {
     try {
       const newEntry = createMoodEntry(mood, note);
+      console.log("👉 New mood entry:", newEntry);
       await addMoodToDB(newEntry);
       setSyncQueue((prev) => [...prev, newEntry]);
       dispatch({ type: "ADD", payload: newEntry });
